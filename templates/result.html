@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js'></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+    <title>GC Perflab result</title>
+    <style type="text/css">
+    #div_g {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 40px;
+      bottom: 10px;
+    }
+#young {
+  width: 640px;
+  height: 480px;
+  display: inline-block;
+  vertical-align: top;
+}
+#young_legend {
+  display: inline-block;
+  vertical-align: top;
+}
+
+
+    </style>
+</head>
+<body style="background-color:#ffaaff;">
+<!--Chart Placement[2]-->
+<!--<div id="chartDiv" style="background-image: url(../images/image.gif);height: 400px; width: 400px;"></div>-->
+<div class="container">
+    <table>
+        <tr><br></tr>
+        <tr>
+            <br>
+        </tr>
+        <tr>
+            <h2>Young gen:</h2></tr>
+        <tr>
+            <div id="young"></div>
+            <div id="young_legend"></div>
+        </tr>
+
+
+        <tr>
+            <br>
+            <br>
+        </tr>
+        <tr>
+            <div class="container">
+                <table>
+                    <tr><h2>Heap:</h2></tr>
+                    <tr>
+                        <div id="heap"></div>
+                    </tr>
+                </table>
+            </div>
+        </tr>
+        <tr>
+            <div class="container">
+                <table>
+                    <tr><h2>Metaspace:</h2></tr>
+                    <tr>
+                        <div id="metaspace"></div>
+                    </tr>
+                </table>
+            </div>
+        </tr>
+        <tr>
+            <div class="container">
+                <table>
+                    <tr><h2>Full GC Pause duration:</h2></tr>
+                    <tr>
+                        <div id="pauseDurationFull"></div>
+                    </tr>
+                </table>
+            </div>
+        </tr>
+        <tr>
+            <div class="container">
+                <table>
+                    <tr><h2>Minor GC Pause duration:</h2></tr>
+                    <tr>
+                        <div id="pauseDurationMinor"></div>
+                    </tr>
+                </table>
+            </div>
+        </tr>
+    </table>
+</div>
+<script>
+/*<div class="foo">Foo Bar</div>
+and in your CSS file:
+
+.foo {
+    background-image: url("images/foo.png");
+}*/
+
+function newDate(stamp) {
+  return moment(stamp, "YYYY-MM-DDTHH:mm:ss.SSSZZ" )
+
+    .toDate();
+}
+
+var dataYoung = [
+{% for date, value1, value2, value3 in zipYoung %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+
+{% endif %}{% endfor %}]
+
+var dataHeap = [
+{% for date, value1, value2, value3 in zipHeap %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var dataMetaspace = [{% for date, value1, value2, value3 in metaSpace %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var pauseDurationFullData = [{% for date, value in pauseDurationFull %}
+[newDate("{{date}}"), {{value}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var pauseDurationMinorData = [{% for date, value in pauseDurationMinor %}
+[newDate("{{date}}"), {{value}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+//console.log(data);
+function youngFormatter(data) {
+  if (data.x == null) return '';  // no selection
+ return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');
+}
+
+function young () {
+new Dygraph(
+            document.getElementById("young"),
+            dataYoung,
+            {
+                labels: [ "Time", "before", "after", "allocated" ],
+                 legend: 'always',
+                 legendFormatter: youngFormatter,
+                  showRangeSelector: true
+            }
+        );};
+
+function heap () {
+new Dygraph(
+            document.getElementById("heap"),
+            dataHeap,
+            {
+                    labels: [ "Time", "before", "after", "allocated" ],
+                 legend: 'always',
+                  showRangeSelector: true
+            }
+        );};
+
+        function metaspace () {
+new Dygraph(
+            document.getElementById("metaspace"),
+            dataMetaspace,
+            {
+                    labels: [ "Time", "before", "after", "allocated" ],
+                 legend: 'always',
+                  showRangeSelector: true
+            }
+        );};
+
+        function pauseDurationFull(){
+        new Dygraph(
+            document.getElementById("pauseDurationFull"),
+            pauseDurationFullData,
+            {
+                    labels: [ "Time", "duration (ms)" ],
+                 legend: 'always',
+                  showRangeSelector: true
+            }
+        );};
+         function pauseDurationMinor(){
+        new Dygraph(
+            document.getElementById("pauseDurationMinor"),
+            pauseDurationMinorData,
+            {
+                    labels: [ "Time", "duration (ms)" ],
+                 legend: 'always',
+                  showRangeSelector: true
+            }
+        );};
+
+young();
+heap();
+metaspace();
+pauseDurationFull();
+pauseDurationMinor();
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

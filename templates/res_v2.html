@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="googlebot" content="noindex, nofollow">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js'></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+	<title>GC Perflab result</title>
+	<style>
+#graph {
+  width: 800px;
+  height: 480px;
+  display: inline-block;
+  vertical-align: top;
+}
+#young_legend {
+  display: inline-block;
+  vertical-align: top;
+}
+
+
+	</style>
+</head>
+<body style="background-color:#ffaaff;">
+<!--Chart Placement[2]-->
+<!--<span id="chartspan" style="background-image: url(../images/image.gif);height: 400px; width: 400px;"></span>-->
+
+<span class="container">
+	<span class="row">
+	<span class="col xs-6 col-sm-4 col-md-3">
+		<span class="row">
+			<a href="javascript:youngGraph()" style="width:100%;" class="btn btn-dark btn-lg" role="button">Young
+				gen</a></span>
+		<span class="row"><a href="javascript:heapGraph()" style="width:100%;" class="btn btn-outline-primary btn-lg"
+								 role="button">Heap space</a></span>
+		<span class="row"><a href="javascript:metaGraph()" style="width:100%;"class="btn btn-light btn-lg">Meta space</a></span>
+		<span class="row"><a href="javascript:pauseMinorGraph()" style="width:100%;" class="btn btn-info btn-lg">Pause duration</a></span>
+	</span>
+	<span class="col xs-6 col-sm-8 col-md-9"><div id = "graph"></div></span>
+	</span>
+	<span class="row"><div class="container">
+		<br>
+		<br>
+		<h1>Metrics</h1>
+	<ul>
+		<li>
+			<h3>First</h3>
+			<p>First text</p>
+		</li>
+	</ul>
+	</div></span>
+</span>
+<script>
+/*<span class="foo">Foo Bar</span>
+and in your CSS file:
+
+.foo {
+	background-image: url("images/foo.png");
+}*/
+
+function newDate(stamp) {
+  return moment(stamp, "YYYY-MM-DDTHH:mm:ss.SSSZZ" )
+
+	.toDate();
+}
+
+var dataYoung = [
+{% for date, value1, value2, value3 in zipYoung %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+
+{% endif %}{% endfor %}]
+
+var dataHeap = [
+{% for date, value1, value2, value3 in zipHeap %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var dataMetaspace = [{% for date, value1, value2, value3 in metaSpace %}
+[newDate("{{date}}"), {{value1}},{{value2}},{{value3}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var pauseDurationFullData = [{% for date, value in pauseDurationFull %}
+[newDate("{{date}}"), {{value}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+var pauseDurationMinorData = [{% for date, value in pauseDurationMinor %}
+[newDate("{{date}}"), {{value}}]{% if not loop.last %},
+{% endif %}{% endfor %}]
+
+//console.log(data);
+function youngFormatter(data) {
+  if (data.x == null) return '';  // no selection
+ return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');
+}
+
+function youngGraph () {
+new Dygraph(
+			document.getElementById("graph"),
+			dataYoung,
+			{
+				labels: [ "Time", "before", "after", "allocated" ],
+				 legend: 'always',
+				 legendFormatter: youngFormatter,
+				  showRangeSelector: true
+			}
+		);};
+
+function heapGraph () {
+new Dygraph(
+			document.getElementById("graph"),
+			dataHeap,
+			{
+					labels: [ "Time", "before", "after", "allocated" ],
+				 legend: 'always',
+				  showRangeSelector: true
+			}
+		);};
+
+		function metaGraph () {
+new Dygraph(
+			document.getElementById("graph"),
+			dataMetaspace,
+			{
+					labels: [ "Time", "before", "after", "allocated" ],
+				 legend: 'always',
+				  showRangeSelector: true
+			}
+		);};
+
+		function pauseFullGraph(){
+		new Dygraph(
+			document.getElementById("graph"),
+			pauseDurationFullData,
+			{
+					labels: [ "Time", "duration (ms)" ],
+				 legend: 'always',
+				  showRangeSelector: true
+			}
+		);};
+		 function pauseMinorGraph(){
+		new Dygraph(
+			document.getElementById("graph"),
+			pauseDurationMinorData,
+			{
+					labels: [ "Time", "duration (ms)" ],
+				 legend: 'always',
+				  showRangeSelector: true
+			}
+		);};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

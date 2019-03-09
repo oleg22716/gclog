@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js'></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"
+    integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" />
+  <style type="text/css">
+    .flip>span {
+      color: transparent;
+      float: none;
+    }
+
+    .flip:hover>span {
+      color: black;
+      float: left;
+    }
+
+    .flip>span:first-child {
+      color: black;
+      float: left;
+    }
+
+    .flip:hover>span:first-child {
+      color: transparent;
+      float: none;
+    }
+
+
+    .description {
+      margin: 0px;
+      display: none;
+      position: absolute;
+      left: 0px;
+      border: 1px solid #000;
+      font-weight: none;
+      width: auto;
+      height: auto;
+    }
+
+    .dygraph-legend {
+      background-color: rgba(200, 200, 255, 0.75);
+      padding: 4px;
+      border: 1px solid black;
+      border-radius: 10px;
+      box-shadow: 4px 4px 4px #888;
+      width: 150px;
+    }
+
+    #graph {
+      position: absolute;
+      left: 200px;
+      right: 10px;
+      top: 40px;
+      bottom: 10px;
+    }
+
+
+    /* Left column */
+    .column.left {
+      width: 35%;
+    }
+
+    /* Middle column */
+    .column.right {
+      width: 65%;
+    }
+
+    @media screen and (max-width: 600px) {
+
+      .column.side,
+      .column.middle {
+        width: 100%;
+      }
+    }
+
+    label {
+    display: inline-block;
+    width: 5em;
+  }
+
+
+      
+  </style>
+  <script>$( function() {
+      $( document ).tooltip();
+    } );</script>
+      <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+      <script>
+      $( function() {
+        $( "#resizable" ).resizable();
+      } );</script>
+  <title>Title</title>
+</head>
+
+<body>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    {% set filename="todo"%}
+
+      {% set programm_duration="todo"%}
+
+  <div>
+    <h2>Analysis Report</h2>
+    <ul>
+      <li>
+        {{filename}}
+      </li>
+      <li>
+        Duration: {{programm_duration}}
+      </li>
+    </ul>
+  </div>
+  <div>
+    <h2>JVM Heap Size</h2>
+    <a href="#" data-toggle="tooltip" data-placement="top" title="Hooray!">Top</a>
+    <table class="table table-striped table-dark table-hover" style="left:100px; right:300px">
+      <thead>
+        <tr>
+          <th scope="col" style="width: 20%">Generation</th>
+          <th scope="col" style="width: 40%">Allocated</th>
+          <th scope="col">Peak</th>
+        </tr>
+      </thead>
+      <!-- <tbody> -->
+        <tr>
+          <td>Young Generation</td>
+          <td><a href="#" data-toggle="tooltip" data-placement="top"  data-container="body" title="{{metrics.young_gen_allocated_plain}}">
+            <!-- <div style="text-align:left;border:1px solid red"
+                   onmouseover="changeTextTo('{{metrics.young_gen_allocated_formatted}}')" 
+                   onmouseout="switchBack()"><span id="young_gen_allocated">{{metrics.young_gen_allocated_plain}}</span>
+                  </div> -->
+            {{metrics.young_gen_allocated_formatted}}</a>
+          </td>
+          <td>Text</td>
+          <!-- <td><div onmouseover="changeTextTo('')" onmouseout="switchBack()"><br> <span id="young_gen_allocated">{{metrics.young_gen_allocated}}</span></div></td> -->
+
+          <!-- <td id="demo" onmouseover="changeTextTo()">Click me to change my HTML content (innerHTML).</td> -->
+        </tr>
+        <tr>
+          <td>Old Generation</td>
+          <td><a href="#" data-toggle="tooltip" data-placement="top" title="Hooray!">Top</a></td>
+          <td>
+            <!-- <div onmouseover="changeTextTo('{{metrics.old_gen_allocated_formatted}}')" onmouseout="switchBack()"><br>
+              <span id="old_gen_allocated">{{metrics.old_gen_allocated_plain}}</span></div> -->
+          </td>
+          </td>
+        </tr>
+        <tr>
+          <td>Meta Space</td>
+          <td>the Bird</td>
+          <td>@twitter</td>
+        </tr>
+      <!-- </tbody> -->
+
+    </table>
+  </div>
+  <table>
+    <tr>
+      <td>
+        <span class="column.left">
+          <span class="container">
+            <span class="col xs-6 col-sm-4 col-md-3">
+              <span class="row">
+                <a href="javascript:youngGraph()" style="width:100%;" class="btn btn-dark btn-lg" role="button">Young
+                  gen</a></span>
+              <span class="row"><a href="javascript:heapGraph()" style="width:100%;"
+                  class="btn btn-outline-primary btn-lg" role="button">Heap space</a></span>
+              <span class="row"><a href="javascript:metaGraph()" style="width:100%;" class="btn btn-light btn-lg">Meta
+                  space</a></span>
+              <span class="row"><a href="javascript:pauseMinorGraph()" style="width:100%;"
+                  class="btn btn-info btn-lg">Pause
+                  duration</a></span>
+              <span class="row">
+                <div id="labels"></div>
+              </span>
+            </span>
+          </span>
+        </span>
+      </td>
+      <td>
+        <span class="column.right">
+          <div id="graph" style="width:800px; height:500px;"></div>
+
+        </span>
+      </td>
+    </tr>
+  </table>
+  <script>
+    /*<div class="foo">Foo Bar</div>
+    and in your CSS file:
+    
+    .foo {
+        background-image: url("images/foo.png");
+    }*/
+
+    function newDate(stamp) {
+      return moment(stamp, "YYYY-MM-DDTHH:mm:ss.SSSZZ")
+
+        .toDate();
+    }
+
+    var dataYoung = [
+      {% for date, value1, value2, value3 in zipYoung %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+
+    {% endif %} {% endfor %}]
+
+    var dataHeap = [
+      {% for date, value1, value2, value3 in zipHeap %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var dataMetaspace = [{% for date, value1, value2, value3 in metaSpace %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var pauseDurationFullData = [{% for date, value in pauseDurationFull %}
+    [newDate("{{date}}"), {{ value }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var pauseDurationMinorData = [{% for date, value in pauseDurationMinor %}
+    [newDate("{{date}}"), {{ value }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    //console.log(data);
+    function youngFormatter(data) {
+      if (data.x == null) return '';  // no selection
+      return '<br>' + data.series.map(function (series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');
+    }
+
+    var baseOpts = {
+      //labelsDiv: document.getElementById("labels"),
+      labelsSeparateLines: true,
+      //  legend: 'follow',
+      showRangeSelector: true
+    };
+
+    var opts = { "labelsSeparateLines": true, "showRangeSelector": true };
+
+    function bytesFormatter(kBytes) {
+      if (kBytes < 1024)
+        return kBytes + 'KB';
+      else if (kBytes < 1048576) //1024*1024
+        return (kBytes / 1024).toPrecision(4) + 'MB';
+      else if (kBytes < 1073741824)
+        return (kBytes / 1048576).toPrecision(4) + 'GB';
+      else return (kBytes / 1073741824).toPrecision(4) + 'TB';
+    }
+
+    function youngGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        dataYoung,
+        {
+          labels: ["Time", "before", "after", "allocated"],
+          "labelsSeparateLines": true,
+          "showRangeSelector": true,
+          //sigFigs: 0,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+
+
+
+      );
+    };
+
+    function heapGraph() {
+      l
+      new Dygraph(
+        document.getElementById("graph"),
+        dataHeap,
+        {
+          legend: 'follow',
+          labels: ["Time", "before", "after", "allocated"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          showRangeSelector: true,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+
+      );
+    };
+
+    function metaGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        dataMetaspace,
+        {
+          labels: ["Time", "before", "after", "allocated"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+      );
+    };
+
+    function pauseFullGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        pauseDurationFullData,
+        {
+          labels: ["Time", "duration (ms)"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true
+        }
+      );
+    };
+    function pauseMinorGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        pauseDurationMinorData,
+        {
+          labels: ["Time", "duration (ms)"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true
+        }
+      );
+    };
+
+
+
+
+
+
+  </script>
+  <script>
+      $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();   
+      });
+      </script>
+</body>
+
+</html>

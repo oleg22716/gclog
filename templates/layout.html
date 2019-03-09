@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .navbar .navbar-nav {
+    display: inline-block;
+    float: none;
+}
+
+.navbar .navbar-collapse {
+    text-align: center;
+}
+{% block style %}{% endblock %}
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--Bootstrap-->
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!--Jquery-->
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+<!--FontAwesome-->
+<script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"
+integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP" crossorigin="anonymous"></script>
+
+
+    <title>{% block title %}Perflab.org {% endblock %}</title>
+{% block head %}{% endblock %}
+
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid" style = "background: #000;" >
+    <!--<div class="row" style = "background: #ffffff; width = 100%; position:fixed;" >-->
+    <a href="process"  style = "width=20%" class="btn btn-dark btn-lg"
+       role="button">Test</a>
+    <a href="upload" style = "width=20%" class="btn btn-dark btn-lg"
+       role="button"><span class= "fas fa-file-upload"></span></a>
+    <a href="/" style = "width=20%"  class="btn btn-dark btn-lg"
+           role="button">Main</a>
+    <a href="process" style = "width=20%"  class="btn btn-dark btn-lg"
+       role="button">btn4</a>
+    <a href="process" style = "width=20%"  class="btn btn-dark btn-lg"
+       role="button">btn5</a>
+
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+</body>
+</html>
