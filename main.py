@@ -43,12 +43,13 @@ def on_upload():
     file_id += 1
     file.save(destination)
     MLP2.main()
-    metrics = {'young_gen_allocated_formatted': kb_formatter(MLP2.Metrics.yg_allocated.value),
-               'young_gen_allocated_plain': MLP2.Metrics.yg_allocated.value,
-               'old_gen_allocated_formatted': kb_formatter(MLP2.Metrics.og_allocated.value),
-               'old_gen_allocated_plain': MLP2.Metrics.og_allocated.value
-               }
-    return render_template('v4.html',
+    metrics = {
+            'young_gen_allocated_formatted': kb_formatter(MLP2.Metrics.yg_allocated.value),
+            'young_gen_allocated_plain': MLP2.Metrics.yg_allocated.value,
+            'old_gen_allocated_formatted': kb_formatter(MLP2.Metrics.og_allocated.value),
+            'old_gen_allocated_plain': MLP2.Metrics.og_allocated.value
+            }
+    return render_template('v1.html',
                            zipYoung=zip(MLP2.Graphics.minor.data[0], MLP2.Graphics.minor.data[3],
                                         # young_gen:before->after->allocated
                                         MLP2.Graphics.minor.data[4], MLP2.Graphics.minor.data[5]),
@@ -62,6 +63,9 @@ def on_upload():
                            )
 
 
+@app.route("/react")
+def react():
+    return render_template("react.html")
 # @app.route('/legend.css')
 # def css():
 #     return """

@@ -60,15 +60,233 @@
 {% block head %} <script>$( function() {
       $( document ).tooltip();
     } );</script>
-      <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-      <script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" />
+      <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js'></script>
+
+ <script>
       $( function() {
         $( "#resizable" ).resizable();
       } );</script>
  {% endblock %} --><!--Head-->
 <!--
 {% block content %}
+<div>
+<table>
+    <tr>
+      <td>
+        <span class="column.left">
+          <span class="container">
+            <span class="col xs-6 col-sm-4 col-md-3">
+              <span class="row">
+                <a href="javascript:youngGraph()" style="width:100%;" class="btn btn-dark btn-lg" role="button">Young
+                  gen</a></span>
+              <span class="row"><a href="javascript:heapGraph()" style="width:100%;"
+                  class="btn btn-outline-primary btn-lg" role="button">Heap space</a></span>
+              <span class="row"><a href="javascript:metaGraph()" style="width:100%;" class="btn btn-light btn-lg">Meta
+                  space</a></span>
+              <span class="row"><a href="javascript:pauseMinorGraph()" style="width:100%;"
+                  class="btn btn-info btn-lg">Pause
+                  duration</a></span>
+              <span class="row">
+                <div id="labels"></div>
+              </span>
+            </span>
+          </span>
+        </span>
+      </td>
+      <td>
+        <span class="column.right">
+        <div id = "resizable" class="ui-widget-content" style="width:800px; height:500px;">
+          <span id="graph" style="width: 100%; height: 100%;"></span></div>
 
+        </span>
+      </td>
+    </tr>
+  </table>
+  <script>
+    /*<div class="foo">Foo Bar</div>
+    and in your CSS file:
+
+    .foo {
+        background-image: url("images/foo.png");
+    }*/
+
+    function newDate(stamp) {
+      return moment(stamp, "YYYY-MM-DDTHH:mm:ss.SSSZZ")
+
+        .toDate();
+    }
+
+    var dataYoung = [
+      {% for date, value1, value2, value3 in zipYoung %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+
+    {% endif %} {% endfor %}]
+
+    var dataHeap = [
+      {% for date, value1, value2, value3 in zipHeap %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var dataMetaspace = [{% for date, value1, value2, value3 in metaSpace %}
+    [newDate("{{date}}"), {{ value1 }}, {{ value2 }}, {{ value3 }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var pauseDurationFullData = [{% for date, value in pauseDurationFull %}
+    [newDate("{{date}}"), {{ value }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    var pauseDurationMinorData = [{% for date, value in pauseDurationMinor %}
+    [newDate("{{date}}"), {{ value }}]{% if not loop.last %},
+    {% endif %} {% endfor %}]
+
+    //console.log(data);
+    function youngFormatter(data) {
+      if (data.x == null) return '';  // no selection
+      return '<br>' + data.series.map(function (series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');
+    }
+
+    var baseOpts = {
+      //labelsDiv: document.getElementById("labels"),
+      labelsSeparateLines: true,
+      //  legend: 'follow',
+      showRangeSelector: true
+    };
+
+    var opts = { "labelsSeparateLines": true, "showRangeSelector": true };
+
+    function bytesFormatter(kBytes) {
+      if (kBytes < 1024)
+        return kBytes + 'KB';
+      else if (kBytes < 1048576) //1024*1024
+        return (kBytes / 1024).toPrecision(4) + 'MB';
+      else if (kBytes < 1073741824)
+        return (kBytes / 1048576).toPrecision(4) + 'GB';
+      else return (kBytes / 1073741824).toPrecision(4) + 'TB';
+    }
+
+    function youngGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        dataYoung,
+        {
+          labels: ["Time", "before", "after", "allocated"],
+          "labelsSeparateLines": true,
+          "showRangeSelector": true,
+          //sigFigs: 0,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+
+
+
+      );
+    };
+
+    function heapGraph() {
+      l
+      new Dygraph(
+        document.getElementById("graph"),
+        dataHeap,
+        {
+          legend: 'follow',
+          labels: ["Time", "before", "after", "allocated"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          showRangeSelector: true,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+
+      );
+    };
+
+    function metaGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        dataMetaspace,
+        {
+          labels: ["Time", "before", "after", "allocated"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true,
+          axes: {
+            y: {
+              valueFormatter: function (y) {
+                // return  y.toPrecision(5) + 'mb';
+                // return  y/1024 + 'mb';
+                return bytesFormatter(y)
+              },
+              axisLabelFormatter: function (y) {
+                return bytesFormatter(y);
+              },
+              axisLabelWidth: 100
+            },
+          }
+
+        }
+      );
+    };
+
+    function pauseFullGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        pauseDurationFullData,
+        {
+          labels: ["Time", "duration (ms)"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true
+        }
+      );
+    };
+    function pauseMinorGraph() {
+      new Dygraph(
+        document.getElementById("graph"),
+        pauseDurationMinorData,
+        {
+          labels: ["Time", "duration (ms)"],
+          //labelsDiv: document.getElementById("labels"),
+          labelsSeparateLines: true,
+          legend: 'follow',
+          showRangeSelector: true
+        }
+      );
+    };
+
+
+
+
+
+
+  </script>
 {% endblock %}
 --><!--Content-->
