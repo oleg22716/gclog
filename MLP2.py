@@ -123,11 +123,6 @@ def pause_duration_timerange_processor():  # todo: duration, number, percentage 
         else:
             a[11] += 1
 
-    for i in Graphics.minor.data[9]:
-        ind = int(i * 10)
-        if ind >= 9:
-            ind = 9
-        a[ind] += 1
     for i in Graphics.full.data[15]:
         if i < 1:
             a[int(i * 10)] += 1
