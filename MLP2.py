@@ -113,37 +113,49 @@ def pause_max_processor():
 
 def pause_duration_timerange_processor():  # todo: duration, number, percentage table
     total = minor_gc_count_processor() + full_gc_count_processor()
-    a = [0] * 10
+    a = [0] * 12
     b = []
-    c = []
+    for i in Graphics.minor.data[9]:
+        if i < 1:
+            a[int(i * 10)] += 1
+        elif i < 5:
+            a[10] += 1
+        else:
+            a[11] += 1
+
     for i in Graphics.minor.data[9]:
         ind = int(i * 10)
         if ind >= 9:
             ind = 9
         a[ind] += 1
     for i in Graphics.full.data[15]:
-        ind = int(i * 10)
-        if ind >= 9:
-            ind = 9
-        a[ind] += 1
+        if i < 1:
+            a[int(i * 10)] += 1
+        elif i < 5:
+            a[10] += 1
+        else:
+            a[11] += 1
 
     counter = 0
-    for value in a[:-1]:
-        c.append([int(counter).__str__() + " - " + int(counter + 100).__str__() + "ms", value, round(value / total, 4)])
-    value = a[len(a) - 1]
-    c.append(["more, than 1 second", value, round(value / total, 4)])
 
-    for value in a[:-1]:
-        b.append({"duration": int(counter).__str__() + " - " + int(counter + 100).__str__() + "ms",
+    for value in a[:-2]:
+        if value != 0:
+            b.append({"duration": int(counter).__str__() + " - " + int(counter + 100).__str__() + "ms",
+                      "number": value,
+                      "percentage": round(value / total, 4)})
+        counter += 100
+
+    value = a[len(a) - 2]
+    if value != 0:
+        b.append({"duration": "1-5 seconds",
                   "number": value,
                   "percentage": round(value / total, 4)})
-        counter += 100
-    value = a[len(a)-1]
-    b.append({"duration": "more, than 1 second",
-              "number": value,
-              "percentage": round(value / total, 4)})
-    print(b)
-    print(c)
+    value = a[len(a) - 1]
+    if value != 0:
+        b.append({"duration": "5+ seconds",
+                  "number": value,
+                  "percentage": round(value / total, 4)})
+    # print(b)
     return b
 
 
