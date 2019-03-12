@@ -12,7 +12,8 @@ from utils.grp import Grp
 from utils.metric import Metric
 
 datafolder = Path("files")
-filename = datafolder / "thy_log_20000"
+fname = datafolder / "thy_log_20000"
+ofname = ""  # original
 
 
 class M:
@@ -110,8 +111,11 @@ def pause_max_processor():
     return max(max(Graphics.full.data[15]), max(Graphics.minor.data[9]))
 
 
-def pause_duration_timerange_processor():
+def pause_duration_timerange_processor():  # todo: duration, number, percentage table
+    total = minor_gc_count_processor() + full_gc_count_processor()
     a = [0] * 10
+    b = []
+    c = []
     for i in Graphics.minor.data[9]:
         ind = int(i * 10)
         if ind >= 9:
@@ -122,7 +126,25 @@ def pause_duration_timerange_processor():
         if ind >= 9:
             ind = 9
         a[ind] += 1
-    return a
+
+    counter = 0
+    for value in a[:-1]:
+        c.append([int(counter).__str__() + " - " + int(counter + 100).__str__() + "ms", value, round(value / total, 4)])
+    value = a[len(a) - 1]
+    c.append(["more, than 1 second", value, round(value / total, 4)])
+
+    for value in a[:-1]:
+        b.append({"duration": int(counter).__str__() + " - " + int(counter + 100).__str__() + "ms",
+                  "number": value,
+                  "percentage": round(value / total, 4)})
+        counter += 100
+    value = a[len(a)-1]
+    b.append({"duration": "more, than 1 second",
+              "number": value,
+              "percentage": round(value / total, 4)})
+    print(b)
+    print(c)
+    return b
 
 
 def minor_gc_count_processor():
@@ -352,6 +374,10 @@ def threads_were_stopped_percentage_processor():
     pass
 
 
+def filename_processor():
+    return ofname
+
+
 # endregion
 
 
@@ -578,6 +604,9 @@ class Metrics:
 
     total_program_duration = Metric("Duration:", total_program_duration_processor)
     metrics.append(total_program_duration)
+
+    filename = Metric("Filename:", filename_processor)
+    metrics.append(filename)
     # endregion
 
 
@@ -589,7 +618,8 @@ def clear():
 
 def main():
     clear()
-    with open(filename, 'r') as file:
+    with open(fname, 'r') as file:
+
         for line in file:
             # line = file.readline()
             spline = line.split()
@@ -598,6 +628,6 @@ def main():
     # Graphics.minor.print(7)
     for a in Metrics.metrics:
         a.process()
-        a.print()
+        # a.print()
 
 # main()
