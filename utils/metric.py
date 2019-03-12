@@ -18,7 +18,7 @@ class Metric:
         return self.value.__str__()+self.legend
 
     def process(self):
-        self.value = self.processor().__str__()
+        self.value = self.processor()
 
     def set_description(self, description):
         self.description = description
