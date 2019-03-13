@@ -161,7 +161,8 @@ def minor_gc_count_processor():
 def minor_gc_reclaimed_processor():
     a = sum(map(sub, Graphics.minor.data[3], Graphics.minor.data[4]))  # yg_after - yg_before
     b = sum(map(sub, Graphics.minor.data[6], Graphics.minor.data[7]))  # heap_before - heap_after
-    return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
+    # return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
+    return a - b
 
 
 # promotion rate frome here: https://plumbr.io/handbook/gc-tuning-in-practice/premature-promotion
@@ -210,10 +211,11 @@ def full_gc_count_processor():
 
 def full_gc_reclaimed_processor():
     a = sum(map(sub, Graphics.full.data[3], Graphics.full.data[4]))  # yg_after - yg_before
+    # b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
+    # b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
     b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
-    b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
-    b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
-    return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
+    # return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
+    return a - b
 
 
 def full_gc_time_total_processor():
@@ -544,8 +546,8 @@ class Metrics:
     minor_gc_time_avg = Metric("Minor gc time: avg", minor_gc_time_avg_processor)
     metrics.append(minor_gc_time_avg)
 
-    minor_gc_time_std_dev = Metric("Minor gc time: standard deviation", minor_gc_time_std_dev_processor)
-    metrics.append(minor_gc_time_std_dev)
+    minor_gc_time_stddev = Metric("Minor gc time: standard deviation", minor_gc_time_std_dev_processor)
+    metrics.append(minor_gc_time_stddev)
 
     minor_gc_time_min_max = Metric("Minor gc time: Min, Max", minor_gc_time_min_max_processor)
     metrics.append(minor_gc_time_min_max)
@@ -565,8 +567,8 @@ class Metrics:
     full_gc_time_avg = Metric("full gc time: avg", full_gc_time_avg_processor)
     metrics.append(full_gc_time_avg)
 
-    full_gc_time_std_dev = Metric("full gc time: standard deviation", full_gc_time_std_dev_processor)
-    metrics.append(full_gc_time_std_dev)
+    full_gc_time_stddev = Metric("full gc time: standard deviation", full_gc_time_std_dev_processor)
+    metrics.append(full_gc_time_stddev)
 
     full_gc_time_min_max = Metric("full gc time: Min, Max", full_gc_time_min_max_processor)
     metrics.append(full_gc_time_min_max)
