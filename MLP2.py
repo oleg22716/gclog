@@ -41,6 +41,11 @@ class Graphics:
     safepoint = Grp(4)
     """timestamp, time_elapsed, threads_were_stopped, stopping_took"""
 
+    combo = Grp(13)
+    """timestamp, time_elapsed, reason, yg_before, yg_after, yg_allocated,heap_before, heap_after, heap_allocated, 
+    duration, times_user, times_sys, times_real
+    """
+
 
 # region [Metrics processors]
 
@@ -96,11 +101,11 @@ def pause_sum_processor():
 
 
 def full_pause_avg_processor():
-    return sum(Graphics.full.data[15]) / len(Graphics.full.data[15])
+    return (sum(Graphics.full.data[15]) / len(Graphics.full.data[15])).total_seconds()
 
 
 def minor_pause_avg_processor():
-    return sum(Graphics.minor.data[9]) / len(Graphics.minor.data[9])
+    return (sum(Graphics.minor.data[9]) / len(Graphics.minor.data[9])).total_seconds()
 
 
 def pause_avg_processor():
@@ -161,8 +166,8 @@ def minor_gc_count_processor():
 def minor_gc_reclaimed_processor():
     a = sum(map(sub, Graphics.minor.data[3], Graphics.minor.data[4]))  # yg_after - yg_before
     b = sum(map(sub, Graphics.minor.data[6], Graphics.minor.data[7]))  # heap_before - heap_after
-    # return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
-    return a - b
+    # return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check. theres some difference between both. less than a % tho
+    return b
 
 
 # promotion rate frome here: https://plumbr.io/handbook/gc-tuning-in-practice/premature-promotion
@@ -180,10 +185,12 @@ def minor_gc_time_std_dev_processor():
     return statistics.stdev(Graphics.minor.data[9])
 
 
-def minor_gc_time_min_max_processor():
-    a = min(Graphics.minor.data[9])
-    b = max(Graphics.minor.data[9])
-    return [a, b]
+def minor_gc_time_min_processor():
+    return min(Graphics.minor.data[9])
+
+
+def minor_gc_time_max_processor():
+    return max(Graphics.minor.data[9])
 
 
 def minor_gc_interval_total_processor():
@@ -199,8 +206,21 @@ def minor_gc_interval_total_processor():
     return delta
 
 
+def minor_gc_interval_stdev_processor():#xxx
+    lastdate = None
+    delta = timedelta()
+    for date in Graphics.minor.data[0]:
+        if lastdate is None:
+            lastdate = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f%z:')
+        else:
+            d = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f%z:')
+            delta += d - lastdate
+            lastdate = d
+    return statistics.stdev()
+
+
 def minor_gc_interval_average_processor():
-    return minor_gc_interval_total_processor() / len(Graphics.minor.data[0])
+    return (minor_gc_interval_total_processor() / len(Graphics.minor.data[0])).total_seconds()
 
 
 #
@@ -215,7 +235,7 @@ def full_gc_reclaimed_processor():
     # b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
     b = sum(map(sub, Graphics.full.data[9], Graphics.full.data[10]))  # heap_before - heap_after
     # return [a, b, a - b, a / 1073741824, b / 1073741824]  # todo check
-    return a - b
+    return b
 
 
 def full_gc_time_total_processor():
@@ -230,10 +250,12 @@ def full_gc_time_std_dev_processor():
     return statistics.stdev(Graphics.full.data[15])
 
 
-def full_gc_time_min_max_processor():
-    a = min(Graphics.full.data[15])
-    b = max(Graphics.full.data[15])
-    return [a, b]
+def full_gc_time_min_processor():
+    return min(Graphics.full.data[15])
+
+
+def full_gc_time_max_processor():
+    return max(Graphics.full.data[15])
 
 
 def full_gc_interval_total_processor():
@@ -250,7 +272,7 @@ def full_gc_interval_total_processor():
 
 
 def full_gc_interval_average_processor():
-    return full_gc_interval_total_processor() / len(Graphics.full.data[0])
+    return (full_gc_interval_total_processor() / len(Graphics.full.data[0])).total_seconds()
 
 
 def full_pause_min_processor():
@@ -279,7 +301,10 @@ def total_pause_average_processor():
 
 
 def total_pause_interval_average_processor():
-    # a=
+    # first timestamp (min
+    min = min(min(Graphics.minor.data[0]), min(Graphics.full.data[0]))
+    max = max(max(Graphics.minor.data[0]), max(Graphics.full.data[0]))
+
     return 2  # todo
 
 
@@ -449,6 +474,20 @@ class Processors:
                                   line[16].__str__().strip("sys=").strip(","),  # 17 times_sys
                                   line[17].__str__().strip("real=").strip(","),  # 18 times_real
                                   )
+                Graphics.combo.put(line[0],  # 0 timestamp
+                                   float(line[1].strip(":")),  # 1 time elapsed
+                                   line[4],  # 2 reason
+                                   yg_b4,  # 3
+                                   yg_after,  # 4
+                                   yg_allocated,  # 5
+                                   heap_b4,  # 6
+                                   heap_after,  # 7
+                                   heap_allocated,  # 8
+                                   float(line[12]),  # 9 duration
+                                   line[15].__str__().strip("user=").strip(","),  # 10 times_user
+                                   line[16].__str__().strip("sys=").strip(","),  # 11 times_sys
+                                   line[17].__str__().strip("real=").strip(","),  # 12 times_real
+                                   )
 
             elif "[GC" in line:
                 sex_index = line.index('secs]')
@@ -468,6 +507,20 @@ class Processors:
                 heap_after = int(a[0])
                 heap_allocated = int(a[1].strip("K),"))
                 Graphics.minor.put(line[0],  # 0 timestamp
+                                   float(line[1].strip(":")),  # 1 time elapsed
+                                   reason,  # 2 reason
+                                   yg_b4,  # 3
+                                   yg_after,  # 4
+                                   yg_allocated,  # 5
+                                   heap_b4,  # 6
+                                   heap_after,  # 7
+                                   heap_allocated,  # 8
+                                   float(line[sex_index - 1]),  # 9 duration
+                                   line[sex_index + 2].__str__().strip("user=").strip(","),  # 10 times_user
+                                   line[sex_index + 3].__str__().strip("sys=").strip(","),  # 11 times_sys
+                                   line[sex_index + 4].__str__().strip("real=").strip(",")  # 12 times_real
+                                   )
+                Graphics.combo.put(line[0],  # 0 timestamp
                                    float(line[1].strip(":")),  # 1 time elapsed
                                    reason,  # 2 reason
                                    yg_b4,  # 3
@@ -549,8 +602,11 @@ class Metrics:
     minor_gc_time_stddev = Metric("Minor gc time: standard deviation", minor_gc_time_std_dev_processor)
     metrics.append(minor_gc_time_stddev)
 
-    minor_gc_time_min_max = Metric("Minor gc time: Min, Max", minor_gc_time_min_max_processor)
-    metrics.append(minor_gc_time_min_max)
+    minor_gc_time_min = Metric("Minor gc time: Min", minor_gc_time_min_processor)
+    metrics.append(minor_gc_time_min)
+
+    minor_gc_time_max = Metric("Minor gc time: Min, Max", minor_gc_time_max_processor)
+    metrics.append(minor_gc_time_max)
 
     minor_gc_interval_average = Metric("Minor gc: average interval", minor_gc_interval_average_processor)
     metrics.append(minor_gc_interval_average)
@@ -570,8 +626,11 @@ class Metrics:
     full_gc_time_stddev = Metric("full gc time: standard deviation", full_gc_time_std_dev_processor)
     metrics.append(full_gc_time_stddev)
 
-    full_gc_time_min_max = Metric("full gc time: Min, Max", full_gc_time_min_max_processor)
-    metrics.append(full_gc_time_min_max)
+    full_gc_time_max = Metric("full gc time: Min, Max", full_gc_time_max_processor)
+    metrics.append(full_gc_time_max)
+
+    full_gc_time_min = Metric("full gc time: Min, Max", full_gc_time_min_processor)
+    metrics.append(full_gc_time_min)
 
     full_gc_interval_average = Metric("full gc: average interval", full_gc_interval_average_processor)
     metrics.append(full_gc_interval_average)

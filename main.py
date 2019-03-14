@@ -4,7 +4,7 @@ from werkzeug.utils import redirect, secure_filename
 
 import MLP2
 from utils import utils
-from utils.utils import kb_formatter
+from utils.utils import kb_formatter, sex_formatter
 
 app = Flask(__name__)
 
@@ -87,25 +87,31 @@ def on_upload():
         # 'total_reclaimed_bytes': MLP2.Metrics.full_gc_reclaimed.value + MLP2.Metrics.minor_gc_reclaimed.value,
         'full_reclaimed_bytes': MLP2.Metrics.full_gc_reclaimed.value,
         'minor_reclaimed_bytes': MLP2.Metrics.minor_gc_reclaimed.value,
-        'total_gc_time_total': MLP2.Metrics.full_gc_time_total.value + MLP2.Metrics.minor_gc_time_total.value,
-        'full_gc_time_total': MLP2.Metrics.full_gc_time_total.value,
-        'minor_gc_time_total': MLP2.Metrics.minor_gc_time_total.value,
-        'total_gc_time_avg': (MLP2.Metrics.full_gc_time_total.value + MLP2.Metrics.minor_gc_time_total.value) /
-                             (MLP2.Metrics.full_gc_count.value + MLP2.Metrics.minor_gc_count.value),
-        'full_gc_time_avg': MLP2.Metrics.full_gc_time_avg.value,
-        'minor_gc_time_avg': MLP2.Metrics.minor_gc_time_avg.value,
-        'total_gc_time_stdev': MLP2.Metrics.total_pause_stdev.value,
-        'full_gc_time_stdev': MLP2.Metrics.full_gc_time_stddev.value,
-        'minor_gc_time_stdev': MLP2.Metrics.minor_gc_time_stddev.value,
+        'total_gc_time_total': sex_formatter(
+            MLP2.Metrics.full_gc_time_total.value + MLP2.Metrics.minor_gc_time_total.value),
+        'full_gc_time_total': sex_formatter(MLP2.Metrics.full_gc_time_total.value),
+        'minor_gc_time_total': sex_formatter(MLP2.Metrics.minor_gc_time_total.value),
+        'total_gc_time_avg': sex_formatter(
+            (MLP2.Metrics.full_gc_time_total.value + MLP2.Metrics.minor_gc_time_total.value) /
+            (MLP2.Metrics.full_gc_count.value + MLP2.Metrics.minor_gc_count.value)),
+        'full_gc_time_avg': sex_formatter(MLP2.Metrics.full_gc_time_avg.value),
+        'minor_gc_time_avg': sex_formatter(MLP2.Metrics.minor_gc_time_avg.value),
+        'total_gc_time_stdev': sex_formatter(MLP2.Metrics.total_pause_stdev.value),
+        'full_gc_time_stdev': sex_formatter(MLP2.Metrics.full_gc_time_stddev.value),
+        'minor_gc_time_stdev': sex_formatter(MLP2.Metrics.minor_gc_time_stddev.value),
 
-        'total_gc_time_min': MLP2.Metrics.pause_min.value,
-        'total_gc_time_max': MLP2.Metrics.pause_max.value,
-        'full_gc_time_min_max': MLP2.Metrics.full_gc_time_min_max.value,
-        'minor_gc_time_min_max': MLP2.Metrics.minor_gc_time_min_max.value,
+        'total_gc_time_min': sex_formatter(MLP2.Metrics.pause_min.value),
+        'total_gc_time_max': sex_formatter(
+            MLP2.Metrics.pause_max.value),
+        'full_gc_time_min': sex_formatter(MLP2.Metrics.full_gc_time_min.value),
+        'minor_gc_time_min': sex_formatter(MLP2.Metrics.minor_gc_time_min.value),
 
-        'total_interval_avg_time': MLP2.Metrics.total_pause_interval_average.value,
-        'full_interval_avg_time': MLP2.Metrics.full_gc_interval_average.value,
-        'minor_interval_avg_time': MLP2.Metrics.minor_gc_interval_average.value
+        'full_gc_time_min_max': sex_formatter(MLP2.Metrics.full_gc_time_max.value),
+        'minor_gc_time_min_max': sex_formatter(MLP2.Metrics.minor_gc_time_max.value),
+
+        'total_interval_avg_time': sex_formatter(MLP2.Metrics.total_pause_interval_average.value),
+        'full_interval_avg_time': sex_formatter(MLP2.Metrics.full_gc_interval_average.value),
+        'minor_interval_avg_time': sex_formatter(MLP2.Metrics.minor_gc_interval_average.value)
 
     }
     return render_template('v1.html',
